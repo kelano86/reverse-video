@@ -1,0 +1,24 @@
+# reverse-video: one Python venv, CPU only, no accounts, no API keys.
+# Set up from the skill folder (README has the full steps for Mac and Windows):
+#   uv venv --python 3.12 .venv
+#   uv pip install -r scripts/requirements.txt --torch-backend cpu
+#   uv pip install --no-deps rapidocr_onnxruntime
+# (rapidocr pins opencv-python, which clashes with the headless build below; --no-deps keeps one cv2)
+# Model weights download on first use and are cached: Whisper medium ~1.5 GB, AST + CLAP ~1.2 GB,
+# Demucs ~80 MB, YuNet 0.3 MB.
+numpy
+scipy
+pillow
+opencv-python-headless
+onnxruntime
+faster-whisper
+yt-dlp
+pyclipper
+shapely
+pyyaml
+six
+# Demucs splits the voice from the music, for the music bed and sound-effect measurements.
+demucs
+# listen.py: free local audio models (AST for AudioSet tags, CLAP for plain-English labels).
+torch
+transformers
