@@ -13,6 +13,14 @@ reverse https://www.youtube.com/shorts/<id>
 It measures what numbers can settle, looks at the frames for the rest, and listens to the audio with
 two open models. **It's free: everything runs on your computer, no accounts, no API keys.**
 
+## See an example
+
+[**A full teardown of a reel that got 506k views**](examples/baptisteodonovan-5-repos/teardown.md), run on my own
+video so it could be checked against the project that made it. Every cut, caption, layout and sound, measured and
+explained, with the formula and a plan to rebuild it ([style.json](examples/baptisteodonovan-5-repos/style.json)).
+
+![Pacing map: shots, cut rate, words per minute, camera, face, text, voice and music, colour, brightness](examples/baptisteodonovan-5-repos/img/pacing_map.png)
+
 ## What you get
 
 ```
@@ -111,8 +119,12 @@ the file path. Local files always work: `reverse ~/Downloads/video.mp4`.
 
 - Dissolves and slow wipes aren't detected as cuts; Claude checks those by eye.
 - When the video films a screen, the screen changing page counts as a cut, so cut counts are an upper bound.
+- When the footage was shot at a lower frame rate than the file (25 fps in a 60 fps reel), jump cuts inside a
+  talking-head shot can't be told apart from head movement, so they may be missed. Layout changes are counted.
 - The audio models say what a sound is like, not whether it was added in the edit or happened in the
   room. Every call comes with its score, and the teardown says how sure it is.
+- Very short, quiet effects under music (a 0.1 s pop, a click) can go unnoticed, and a low boom can pass
+  for part of the music.
 - Fonts are matched by eye ("closest free match"), never confirmed.
 
 ## Use it fairly

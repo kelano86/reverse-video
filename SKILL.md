@@ -251,6 +251,10 @@ template.
   need eyes. A `transition` can be in-frame motion (scrolling, a fast pan): confirm with a strip. A
   screen that fills the frame changing page reads as a `new` cut: when the video films a monitor or
   phone, treat the cut count as an upper bound.
+- Footage shot at a lower frame rate than the file (a 25 fps recording in a 60 fps reel) repeats frames;
+  measure.py spots it (`real_fps`, a warning) and then judges each new frame against the other new
+  frames. Before that fix a 25-in-60 reel read as 97 cuts instead of 39. In that mode, jump cuts inside
+  a talking-head shot can't be told from head movement and may be missed: check the boards.
 - A handheld camera's zooms are reported as `handheld push/pull`, not edit zooms. `snap zoom` means a
   sudden zoom inside a steady shot (an edit keyframe or a Screen Studio style zoom).
 - The OCR drops spaces in caption text ("ANDICAN"); word counts come from matching the caption's
@@ -263,10 +267,17 @@ template.
 - listen.py names what a sound is like, not whether it was added in the edit: in a filmed video, desk
   taps, phone handling and an app's own sounds get effect names with the same scores as real added
   effects. Decide provenance from context (on cuts or text? a mixed studio sound? a music bed?).
-- Known-answer test (8 effects planted under a music bed and a voice): all 8 found; ding, glitch, boom
-  and counter named right or close; a pop and a click called "part of the music"; a whoosh called
-  "punch impact"; one music note passed as an effect. Music notes the detector catches are mostly
-  labelled "part of the music". Treat single calls as leads, patterns across calls as findings.
+- In a plucky, tonal music bed, CLAP hears melody notes as "a coin sound", "a chime", "a bubble pop".
+  listen.py therefore compares each candidate with the music just around it (`sounds_like_bed`, CLAP
+  similarity; 0.70 or more = part of the music). Tested on a reel with a music bed and no effects
+  (checked against its project): 8 false "confident" effects before, 0 after. On the same reel with 8
+  planted effects: whoosh, ding, riser, glitch and coin found with no false ones; a 0.12 s pop and a
+  0.03 s click weren't detected at all, and a low boom was taken for part of the music. Names can be
+  off (the whoosh came back as "a punch impact"). The 0.70 line was tuned on one track: read the
+  scores in the table, and check a surprising call with a strip.
+- Earlier known-answer test (8 effects under a different music bed and a voice): all 8 found; ding,
+  glitch, boom and counter named right or close; a pop and a click called "part of the music"; a
+  whoosh called "punch impact". Treat single calls as leads, patterns across calls as findings.
 - listen.py's labels are model judgements. AudioSet's genre and mood classes are broad ("Electronic
   music", "Happy music"), CLAP's zero-shot labels are a share across the list you gave it, so a
   confident-looking top label can still be the least-bad option: read the scores.

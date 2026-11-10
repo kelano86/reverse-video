@@ -1,0 +1,110 @@
+{
+  "name": "baptisteodonovan-5-repos",
+  "sources": [{"url": "https://www.instagram.com/reel/DdEea0wiU1_/", "views": 506531, "views_source": "creator's own stats, 9 Nov 2026",
+               "likes": 18882, "comments": 4146, "duration_s": 65.5, "outlier_vs_usual": 148}],
+  "format": {"aspect": "9:16", "resolution": "1080x1920", "fps": 60, "camera_fps": 25, "duration_s": 65.5},
+
+  "script": {
+    "archetype": "numbered listicle of free tools",
+    "beats": [
+      {"name": "hook", "t_s": [0, 4.5], "purpose": "number + recency + free", "pattern": "These [N] [things] just [took off] this [week], and every one is [free]."},
+      {"name": "item", "count": 5, "length_s": [9.4, 12.4], "purpose": "one tool each",
+       "pattern": "The [first] is [Name], [credibility fact]. It's basically [familiar thing], but [twist], so you [benefit]."},
+      {"name": "last item", "t_s": [49.7, 60.0], "pattern": "And finally, [Name], which lets you [outcome] in [time] for [cost]."},
+      {"name": "cta", "t_s": [60.0, 65.5], "pattern": "If you want all the links, comment [WORD] and I'll send them to you."}
+    ],
+    "hook": {"first_word_s": 0.0, "words_first_3s": 11, "first_cut_s": 2.1,
+             "visual": "cream title card, 5 app icons pop in, spoken line builds word by word, face waving in an inset",
+             "promise": "five free tools worth stopping for"},
+    "cta": {"type": "comment gate", "at_s": 60.0, "also": "first line of the post", "visual": "mock comment box with the keyword"},
+    "language": {"wpm_talking": 217, "talk_coverage_pct": 93.3, "words_per_sentence": 22.1, "you_per_100": 7.2, "i_per_100": 0.5,
+                 "questions": 0, "longest_pause_s": 0.58}
+  },
+
+  "pacing": {"cuts_per_min": 35.7, "shot_s": {"mean": 1.64, "median": 1.63, "p10": 0.38, "p90": 2.55, "max": 3.12},
+             "mean_shot_by_quarter_s": [1.98, 1.47, 1.30, 1.98], "first_cut_s": 2.1,
+             "cuts_vs_speech_pct": {"word_start": 53.8, "mid_word": 17.9, "pause_or_no_speech": 28.2},
+             "rule": "change layout every 1-3 s; never hold a shot past 3.2 s"},
+
+  "shots": {
+    "compositions": [
+      {"name": "face, full bleed, dark room", "share_pct": 31, "shots": 12, "used_for": "the spoken claim"},
+      {"name": "graphic top, face in a rounded inset below", "share_pct": 30, "shots": 10, "used_for": "showing the tool while talking"},
+      {"name": "graphic only, cream or dark card", "share_pct": 24, "shots": 12, "used_for": "screenshots, diagrams, step list, stats"},
+      {"name": "item title card on cream", "share_pct": 15, "shots": 6, "used_for": "opening every item"}
+    ],
+    "face": {"on_screen_pct": 61.1, "size": "extreme close-up", "face_height_of_width": 0.88, "centre_x_pct": 49, "eyeline_y_pct": 39},
+    "camera": {"type": "one locked camera, eye level, dark room, warm practical lamp at frame right",
+               "inset": "a wider framing of the same camera", "edit_zooms": 0}
+  },
+
+  "editing": {
+    "cut_types": {"layout_change": 32, "list_step": 4, "card_build": 2, "jump": 1},
+    "transitions": [],
+    "note": "hard cuts only; the motion lives inside the shots"
+  },
+
+  "motion": {
+    "elements": [
+      {"name": "item card", "trigger": "each new item", "in": {"type": "hard cut, then staggered fades: number + caption, name, icon, stars",
+       "frames_each": [7, 8], "stagger_frames": [3, 5], "easing": "ease-out", "movement": "none"}, "hold_s": [1.4, 2.6], "out": {"type": "cut"}},
+      {"name": "caption", "trigger": "each 2-word chunk", "in": {"type": "fade with a slight scale-up", "frames": 3, "easing": "ease-out"},
+       "hold_s": 0.48, "out": {"type": "replaced by the next"}},
+      {"name": "terminal", "trigger": "split layout", "in": {"type": "fade, then the command types out", "frames": 3, "frames_per_letter": 5},
+       "out": {"type": "cut"}},
+      {"name": "hook icon row", "trigger": "first frame", "in": {"type": "pop, left to right", "stagger_frames": 5}, "hold_s": 2.0},
+      {"name": "step list", "trigger": "naming steps", "in": {"type": "highlight bar steps down one row", "frames": 0}, "hold_s_per_step": 0.38}
+    ]
+  },
+
+  "type": {
+    "captions": {
+      "words": 2, "words_max": 3, "hold_s": 0.48, "y_centre_pct": 71.0, "width_pct_median": 45.8, "lines": 1,
+      "letter_height_px_1080w": 62, "sync_vs_voice_s": -0.14,
+      "styles": [
+        {"where": "on the face", "font_match": "Inter ExtraBold or Segoe UI Black (match, not confirmed)", "case": "sentence",
+         "fill": "#F3F5EF", "shadow": "soft dark", "plate": null},
+        {"where": "on cream cards", "font_match": "Cambria Bold Italic or Playfair Display Italic (match, not confirmed)", "case": "upper",
+         "fill": "#131C15", "plate": null},
+        {"where": "key word, anywhere", "font_match": "same serif", "case": "upper", "fill": "green, #4E7661 in the pixel read"}
+      ],
+      "entrance": "3-frame fade with a slight scale-up", "build": "each chunk replaces the last"
+    },
+    "titles": [
+      {"what": "item name", "font_match": "italic serif", "fill": "green", "position": "centred near the top", "with": "#N above, stars and icon below"},
+      {"what": "hook title", "font_match": "italic serif", "fill": "#131C15"}
+    ],
+    "families": 2
+  },
+
+  "colour": {
+    "palette": [
+      {"hex": "#F5F5F2", "role": "card ground", "share_pct": 40},
+      {"hex": "#1B1B18", "role": "room and terminal", "share_pct": 25},
+      {"hex": "#3C3027", "role": "room brown", "share_pct": 14},
+      {"hex": "#96573B", "role": "skin shadow", "share_pct": 7},
+      {"hex": "#E2A88D", "role": "skin light", "share_pct": 6}
+    ],
+    "accent": "green, for names and key words",
+    "grade": {"brightness": 0.551, "black": 0.083, "white": 0.962, "saturation": 0.216, "warmth": 0.043, "look": "ungraded room against clean cards"},
+    "light_frames_pct": 40.1, "dark_frames_pct": 13.0, "texture": "none visible"
+  },
+
+  "sound": {
+    "voice": {"lufs": -14.2, "lra_lu": 2.0, "true_peak_dbfs": -0.1, "low_vs_1k_db": 5.4, "presence_vs_1k_db": 5.7, "air_vs_1k_db": 6.4},
+    "music": {"bed": "continuous", "heard_music_pct": 98.4, "under_voice_db": -17.0, "ducking_db": -1.9, "bpm": 133.5,
+              "bpm_confidence": 0.42, "cuts_on_beat": false, "style_clap": "phonk 0.51", "mood_clap": "inspiring 0.37, playful 0.33"},
+    "sfx": {"added_in_edit": "none", "candidates": 48, "all_like_the_bed": true, "confirmed": "against the project's own music file"},
+    "voices": ["male, one speaker"]
+  },
+
+  "packaging": {"post_first_line": "comment gate", "first_frame_is_cover": true, "description": "the full script as text"},
+
+  "confidence": {
+    "measured": ["pacing", "shots.face", "type.captions (timing, size, position, colours)", "colour", "script.language", "sound.voice", "sound.music levels"],
+    "heard": ["sound.music.heard_music_pct", "sound.music.style_clap", "sound.sfx", "sound.voices"],
+    "seen": ["shots.compositions", "editing.cut_types", "motion.elements", "type.captions.styles", "type.titles"],
+    "inferred": ["type.captions.styles[].font_match"],
+    "checked_against_project": ["format.camera_fps", "sound.music.bed", "sound.sfx", "type.captions.styles", "motion.elements[1]"]
+  }
+}

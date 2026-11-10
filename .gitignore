@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 teardowns/*/work/
 .DS_Store
+examples/*/work/

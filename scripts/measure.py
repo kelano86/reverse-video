@@ -128,6 +128,30 @@ D, HD, LUMA, N = pass1()
 G = np.load(C / "gray160.npy", mmap_mode="r")
 
 
+# ---------------------------------------------------------------- real frame rate
+def real_fps():
+    """Frames a second that carry new content. A 25 fps recording rendered at 60 repeats most frames;
+    judged where there's movement (mean difference around the frame), so still stretches don't count."""
+    if N < 20:
+        return FPS
+    w = max(5, int(FPS / 2))
+    act = np.convolve(D, np.ones(2 * w + 1) / (2 * w + 1), mode="same")
+    moving = act > 0.004
+    if moving.sum() < FPS:
+        return FPS
+    dup = (D < 0.002) & moving
+    return round(FPS * (1 - dup.sum() / moving.sum()), 1)
+
+
+REAL_FPS = real_fps()
+JUDDER = REAL_FPS < 0.8 * FPS
+if JUDDER:
+    ERR.append(f"many frames repeat the one before (new content averages ~{REAL_FPS} fps in a {FPS:g} fps file: footage "
+               "shot at a lower frame rate, maybe with graphics at the full rate): cuts were judged against the other "
+               "new frames only, so jump cuts inside a talking-head shot can't be told from movement and may be "
+               "missed; layout and shot changes are counted")
+
+
 def ecc(a, b, inits=(1.0,), iters=50):
     """Affine ECC from frame a to frame b. Returns (cc, scale, shift_x, shift_y, warp); scale > 1 = b is tighter."""
     A = np.asarray(a, np.float32) / 255
@@ -159,15 +183,25 @@ def detect_cuts():
         return c
     step("cuts and transitions")
     s = D * 2.0 + HD
-    win = max(5, int(round(FPS * 0.4)))
     from numpy.lib.stride_tricks import sliding_window_view
-    base = np.median(sliding_window_view(np.pad(s, (win, win), mode="edge"), 2 * win + 1), axis=1)
+    k = 3.5
+    if JUDDER:
+        # most frames repeat, so the median difference is ~0 and ordinary movement would read as a cut:
+        # judge each new frame against the other new frames (tested on a 25-in-60 fps talking-head reel)
+        idx = np.where(D >= 0.002)[0]
+        wd = max(5, int(round(REAL_FPS * 0.4)))
+        bd = np.median(sliding_window_view(np.pad(s[idx], (wd, wd), mode="edge"), 2 * wd + 1), axis=1)
+        base = np.interp(np.arange(N), idx, bd)
+        k = 2.5
+    else:
+        win = max(5, int(round(FPS * 0.4)))
+        base = np.median(sliding_window_view(np.pad(s, (win, win), mode="edge"), 2 * win + 1), axis=1)
     cand = []
     for t in range(1, N):
         if s[t] < 0.06:
             continue
         hard = s[t] >= 0.5 and HD[t] >= 0.25
-        rel = s[t] > 3.5 * base[t] + 0.03 and D[t] > 0.02
+        rel = s[t] > k * base[t] + 0.03 and D[t] > 0.02
         if not (hard or rel):
             continue
         if s[t] < s[max(1, t - 2):min(N, t + 3)].max():
@@ -254,18 +288,6 @@ def shot_at(t):
     return SHOTS[max(0, i)]
 
 
-# ---------------------------------------------------------------- real frame rate
-def real_fps():
-    from numpy.lib.stride_tricks import sliding_window_view
-    if N < 20:
-        return FPS
-    w = max(5, int(FPS / 2))
-    med = np.median(sliding_window_view(np.pad(D, (w, w), mode="edge"), 2 * w + 1), axis=1)[:N]
-    moving = med > 0.01
-    if moving.sum() < FPS:
-        return FPS
-    dup = (D < 0.0015) & moving
-    return round(FPS * (1 - dup.sum() / moving.sum()), 1)
 
 
 # ---------------------------------------------------------------- camera
@@ -1227,6 +1249,8 @@ def grab(times, short=360):
 
 def boards(cam, facesd, colr):
     files = {}
+    for old in list(IMG.glob("shots_*.jpg")) + list(IMG.glob("sheet_*.jpg")):  # a re-run may make fewer pages
+        old.unlink()
     # shot board: one frame per shot, at its middle
     mids = [s["start"] + s["dur"] / 2 for s in SHOTS]
     ims = grab(mids, short=300 if VERT else 220)
@@ -1627,7 +1651,7 @@ def main():
     except Exception as e:
         ERR.append(f"pacing map: {e!r}")
     fmt = dict(P)
-    fmt["real_fps"] = real_fps()
+    fmt["real_fps"] = REAL_FPS
     M = {"source": {k: META.get(k) for k in ("source", "platform", "id", "title", "channel", "uploader", "upload_date",
                                              "view_count", "like_count", "comment_count", "channel_follower_count",
                                              "channel_followers", "chapters", "via") if META.get(k) is not None},

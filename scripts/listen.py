@@ -270,11 +270,33 @@ def main():
             if clap:
                 clips48.append(m48[int(s * 48000):int((s + ln) * 48000)])
         Pe = ast.probs(clips16)
+        # how much each candidate sounds like the music just around it: a melody note in a plucky bed
+        # gets effect names from CLAP ("a coin sound", "a chime") but sounds like its neighbours, while
+        # an effect laid over the bed doesn't (tested on a reel with no effects and on the same reel with
+        # 8 planted ones: notes 0.71-0.90, planted effects 0.52-0.63, a boom 0.76)
+        bed_sim = {}
+        if clap and music.get("present_pct", 0) >= 30:
+            cand_t = [e["t"] for e in events]
+            n48 = len(m48) / 48000
+
+            def clip06(t):
+                s0 = max(0.0, t - 0.12)
+                return m48[int(s0 * 48000):int((s0 + 0.6) * 48000)]
+            for i, t in enumerate(cand_t):
+                ctx = [t + d for d in (-2.0, -1.5, -1.0, 1.0, 1.5, 2.0) if 0.2 < t + d < n48 - 0.8
+                       and all(abs(t + d - o) > 0.35 for j, o in enumerate(cand_t) if j != i)]
+                if len(ctx) < 2:
+                    ctx = [t + d for d in (-2.0, -1.0, 1.0, 2.0) if 0.2 < t + d < n48 - 0.8]
+                if ctx:
+                    E = clap.audio([clip06(t)] + [clip06(x) for x in ctx])
+                    bed_sim[i] = round(float((E[1:] @ E[0]).max()), 3)
         for i, (e, p) in enumerate(zip(events, Pe)):
             row = {"t": e["t"], "measured_kind": e["kind"], "after_cut": e.get("after_cut"), "on_beat": e.get("on_beat"),
                    "audioset": ast.top(p, 4, exclude=NOT_SFX)}
             if clap:
                 row["clap"] = clap.rank(clap.audio([clips48[i]]), SFX_VOCAB, 3)
+            if i in bed_sim:
+                row["sounds_like_bed"] = bed_sim[i]
             best = row.get("clap", [{}])[0]
             ast_best = row["audioset"][0] if row["audioset"] else {"label": None, "score": 0}
             # a "music" call only makes sense when there is music on this layer
@@ -283,7 +305,8 @@ def main():
             # CLAP's softmax is overconfident on anything; its raw similarity separates real effects
             # (0.2-0.32 in testing) from music notes and room sounds (mostly under 0.2)
             clap_ok = best.get("p", 0) >= 0.4 and best.get("cos", 0) >= 0.2
-            if musical:
+            like_bed = row.get("sounds_like_bed", 0) >= 0.70
+            if musical or (like_bed and not voice):
                 call = "part of the music"
             elif voice:
                 call = "a voice, not an effect"
@@ -296,7 +319,8 @@ def main():
             else:
                 call = "unsure: " + (best.get("label") or ast_best["label"] or "?")
             row["call"] = call
-            row["sure"] = bool(clap_ok or ast_best["score"] >= 0.3)
+            row["sure"] = bool(row.get("sounds_like_bed", 0) >= 0.78 if like_bed and not musical
+                               else clap_ok or ast_best["score"] >= 0.3)
             sfx_out.append(row)
 
     # ---- voices: what kind of voice, and any voice the transcript doesn't have
@@ -370,10 +394,11 @@ def write_summary(WD, L):
         out.append(f"| Added effects | {len(sure)} named with confidence, {len(fx) - len(sure)} unsure, {mus} candidates were the music "
                    f"and {len(L['sfx']) - len(fx) - mus} a voice or room sound (of {len(L['sfx'])} candidates)"
                    + (": " + ", ".join(f"{k} x{v}" for k, v in names.most_common()) if names else "") + " |")
-        out += ["", "| t | Call | Sure | AudioSet | CLAP | After cut |", "|---|---|---|---|---|---|"]
+        out += ["", "Like the bed: CLAP similarity to the music just around it; 0.70 or more counts as part of the music.",
+                "", "| t | Call | Sure | AudioSet | CLAP | Like the bed | After cut |", "|---|---|---|---|---|---|---|"]
         for e in L["sfx"]:
             out.append(f"| {tc(e['t'])} | {e['call']} | {'yes' if e['sure'] else 'no'} | {fmt(e['audioset'][:2])} | "
-                       f"{fmt(e.get('clap', [])[:2], 'p')} | {e['after_cut']} |")
+                       f"{fmt(e.get('clap', [])[:2], 'p')} | {e.get('sounds_like_bed', '-')} | {e['after_cut']} |")
     s = s.rstrip() + "\n" + "\n".join(out) + "\n"
     p.write_text(s, encoding="utf-8")
 
